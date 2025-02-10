@@ -1,0 +1,1 @@
+Halo {{ $nama }} dari blade
