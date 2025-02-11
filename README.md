@@ -8,7 +8,7 @@
 Proyek ini dibuat untuk melaksanakan Uji Kompetensi (Ujikom) dan sebagai syarat kelulusan.
 
 ## Deskripsi
-FamiList adalah aplikasi manajemen tugas yang dibangun menggunakan Laravel dan Bootstrap. Aplikasi ini memungkinkan pengguna untuk mengelola tugas dengan fitur-fitur lengkap.
+FamiList adalah aplikasi manajemen tugas yang dibangun menggunakan Laravel dan Bootstrap. Aplikasi ini memungkinkan pengguna untuk mengelola tugas menjadi lebih mudah.
 
 ## Fitur Utama
 - **Autentikasi**: Login, Logout, Register
