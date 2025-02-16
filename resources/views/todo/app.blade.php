@@ -171,6 +171,10 @@
                         <label for="tenggat_waktu" class="form-label">Tenggat waktu</label>
                         <input type="datetime-local" class="form-control" id="tenggat_waktu" name="tenggat_waktu" required>
                     </div>
+                    <div class="mb-3 w-50">
+                        <label for="reminder" class="form-label">Reminder</label>
+                        <input type="datetime-local" class="form-control" id="reminder" name="reminder" required>
+                    </div>
         
                     <div class="mb-3">
                         <label for="prioritas" class="form-label">Prioritas</label>

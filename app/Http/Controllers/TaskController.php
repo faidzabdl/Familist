@@ -110,6 +110,7 @@ public function index(Request $request)
         'name' => 'required',
         'tenggat_waktu' => 'required',
          'tenggat_waktu.required' => 'Tenggat waktu harus diisi.',
+         'reminder.required' => 'Reminder harus diisi.',
          'prioritas' => 'required'
     ]);
     
@@ -122,6 +123,7 @@ public function index(Request $request)
             'deskripsi' => $request->deskripsi,
             'reminder' => $request->reminder,
             'tenggat_waktu' => $request->tenggat_waktu,
+            'reminder' => $request->reminder,
             'prioritas' => $request->prioritas
         ]);
     }
@@ -135,14 +137,18 @@ public function index(Request $request)
     {
        
         $subtasks = Subtask::where('task_id', $id)->get();
-    
+        $task = Task::where('id', $id)->first();;
        
         foreach ($subtasks as $subtask) {
             if ($subtask->status == 'belum') {
-                return redirect()->back()->with('error', 'Ada subtask yang belum selesai');
+                return redirect()->back()->with('error', 'Ada sub tugas yang belum selesai');
             }
         }
-    
+
+        if ($task->status == "belum"){
+            return redirect()->back()->with('error', 'Tugas belum selesai');
+        }
+        
      
         Task::where('id', $id)->delete();
         Subtask::where('task_id', $id)->delete();

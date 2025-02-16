@@ -12,6 +12,8 @@ class Task extends Model
          'user_id', 
          'deskripsi', 
          'tenggat_waktu', 
+         'reminder',
+         'keterangan_reminder',
          'keterangan_skor',
          'prioritas',
         ];

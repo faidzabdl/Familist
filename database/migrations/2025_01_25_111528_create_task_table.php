@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('deskripsi')->nullable();
             $table->dateTime('tenggat_waktu');
+            $table->dateTime('reminder');
+            $table->boolean('keterangan_reminder')->default(false);
             $table->enum('status', ['belum', 'selesai', 'terlambat'])->default('belum');
             $table->boolean('keterangan_skor')->default(false);
             $table->enum('prioritas', ['1', '2', '3']);
