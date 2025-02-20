@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Registerasi FamiList</title>
+    <title>Registrasi FamiList</title>
     <!-- Bootstrap CSS -->
     <link rel="icon" href="{{ asset('images/favicon(2)-32x32.png') }}" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -63,21 +63,43 @@
             <div class="col-md-5">
                 <div class="card">
                     <div class="card-body text-center">
-                        <h2 class="mb-4" style="color: #1976d2;">Registerasi</h2>
-                        <p class="mb-4" style="color: #555;">Silahkan isi formulir berikut untuk registerasi aplikasi</p>
+                        <h2 class="mb-4" style="color: #1976d2;">Registrasi</h2>
+                        <p class="mb-4" style="color: #555;">Silahkan isi formulir berikut untuk registrasi aplikasi</p>
+                        
+                        
+
+                        <!-- Menampilkan pesan sukses -->
+                        @if(session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
                         <form method="POST" action="{{ route('registerasi.submit') }}">
                             @csrf
                             <div class="mb-3">
-                                <input type="text" name="name" class="form-control" placeholder="Nama Lengkap">
+                                <input type="text" name="name" class="form-control" placeholder="Nama Lengkap" value="{{ old('name') }}" required>
                             </div>
                             <div class="mb-3">
-                                <input type="email" name="email" class="form-control" placeholder="Email Address">
+                                <input type="email" name="email" class="form-control" placeholder="Email Address" value="{{ old('email') }}" required>
                             </div>
                             <div class="mb-3">
-                                <input type="password" name="password" class="form-control" placeholder="Password">
+                                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" name="password_confirmation" class="form-control" placeholder="Konfirmasi Password" required>
                             </div>
                             <button class="btn btn-primary w-100">REGISTER</button>
                         </form>
+                        <!-- Menampilkan error validasi -->
+                        @if ($errors->any())
+                             <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li class="text-danger err mt-3">{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+
                         <p class="mt-3">
                             Sudah punya akun?
                             <a href="{{ route('login') }}">Login di sini &raquo;</a>
@@ -89,5 +111,18 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+       document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.err').forEach(error => {
+        error.style.cursor = 'pointer'; 
+        error.addEventListener('click', () => {
+            error.remove();   
+        });
+    });
+});
+
+        
+        
+    </script>
 </body>
 </html>

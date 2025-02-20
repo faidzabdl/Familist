@@ -121,12 +121,42 @@
             font-size: 14px;
         }
         .pagination {
-            justify-content: center;
-        }
-        .pagination .page-item .page-link {
-            border-radius: 50px;
-            margin: 0 2px;
-        }
+    display: flex;  /* Pastikan tetap horizontal */
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination li {
+    display: inline-flex; 
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #1976d2; 
+    color: white;
+    border-color: #1976d2;
+}
+
+.pagination .page-item .page-link {
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    padding: 8px 12px;
+    border-radius: 50px;
+    text-decoration: none;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease-in-out;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #f1f1f1;
+    border-color: #bbb;
+}
+
+
     .custom-radius input, .custom-radius select, .custom-radius button {
         border-radius: 12px; /* Ganti dengan ukuran radius yang diinginkan */
     }
@@ -324,9 +354,10 @@
                         <div class="modal-header d-flex w-100 position-relative">
                             <div class="d-flex flex-column w-100">
                                 <h5 class="modal-title mb-2">Subtugas untuk tugas {{ $task->name }}</h5>
-                                <p class="modal-title text-muted mb-2">Deskripsi        : {{ $task->deskripsi ?? "Tidak ada deskripsi" }}</p>
+                                <p class="modal-title text-muted mb-0">Deskripsi        : {{ $task->deskripsi ?? "Tidak ada deskripsi" }}</p>
                                 <p class="modal-title text-muted mb-0">Tenggat waktu    : {{ $task->tenggat_waktu }}</p>
                                 <p class="modal-title text-muted mb-0">Prioritas    : {{ $task->prioritas }}</p>
+                                <p class="modal-title text-muted mb-0">Reminder    : {{ $task->reminder }}</p>
                             </div>
                             <button type="button" class="btn-close btn-sm position-absolute top-0 end-0" data-bs-dismiss="modal"></button>
                         </div>
@@ -395,9 +426,10 @@
                         <div class="modal-header d-flex w-100 position-relative">
                             <div class="d-flex flex-column w-100">
                                 <h5 class="modal-title mb-2">Subtugas untuk tugas {{ $task->name }}</h5>
-                                <p class="modal-title text-muted mb-2">Deskripsi        : {{ $task->deskripsi ?? "Tidak ada deskripsi" }}</p>
+                                <p class="modal-title text-muted mb-0">Deskripsi        : {{ $task->deskripsi ?? "Tidak ada deskripsi" }}</p>
                                 <p class="modal-title text-muted mb-0">Tenggat waktu    : {{ $task->tenggat_waktu }}</p>
                                 <p class="modal-title text-muted mb-0">Prioritas    : {{ $task->prioritas }}</p>
+                                <p class="modal-title text-muted mb-0">Reminder    : {{ $task->reminder }}</p>
                             </div>
                             <button type="button" class="btn-close btn-sm position-absolute top-0 end-0" data-bs-dismiss="modal"></button>
                         </div>
@@ -494,10 +526,52 @@
             @endif
         </ul>
 
-        <!-- Paginasi -->
-        <div class="mt-3">
-            {{ $tasks->links() }}         
-        </div>
+<!-- Pagination -->
+<div class="mt-3 flex justify-center">
+    <ul class="pagination">
+        {{-- Previous Button --}}
+        @if ($tasks->onFirstPage())
+            <li class="page-item disabled">
+                <span class="page-link">«</span>
+            </li>
+        @else
+            <li class="page-item">
+                <a href="{{ $tasks->previousPageUrl() }}" class="page-link">«</a>
+            </li>
+        @endif
+
+        {{-- Page Numbers --}}
+        @foreach(range(1, $tasks->lastPage()) as $i)
+            @if ($i == 1 || $i == $tasks->lastPage() || ($i >= $tasks->currentPage() - 2 && $i <= $tasks->currentPage() + 2))
+            <li class="page-item {{ $i == $tasks->currentPage() ? 'active' : '' }}">
+                <a href="{{ $tasks->url($i) }}" class="page-link">
+                    {{ $i }}
+                </a>
+            </li>            
+            @elseif ($i == 2 || $i == $tasks->lastPage() - 1)
+                <li class="page-item">
+                    <span class="page-link">...</span>
+                </li>
+            @endif
+        @endforeach
+
+        {{-- Next Button --}}
+        @if ($tasks->hasMorePages())
+            <li class="page-item">
+                <a href="{{ $tasks->nextPageUrl() }}" class="page-link">»</a>
+            </li>
+        @else
+            <li class="page-item disabled">
+                <span class="page-link">»</span>
+            </li>
+        @endif
+    </ul>
+</div>
+
+
+
+
+
     </div>
 </div>
 

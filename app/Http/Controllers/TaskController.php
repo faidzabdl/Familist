@@ -90,7 +90,7 @@ public function index(Request $request)
         $tasksQuery->orderBy('created_at', 'desc');
     }
 
-    $tasks = $tasksQuery->paginate(5)->appends(request()->query());
+    $tasks = $tasksQuery->paginate(5);
 
     return view('todo.app', compact('tasks'));
 }
@@ -116,6 +116,10 @@ public function index(Request $request)
     
     if($request->tenggat_waktu < Carbon::now()){
         return redirect()->back()->with('error', 'waktu deadline harus lebih dari waktu sekarang');
+    }elseif(Carbon::parse($request->reminder) > Carbon::parse($request->tenggat_waktu)){
+        return redirect()->back()->with('error', 'reminder jangan lebih maju dari tenggat waktu');
+    }elseif(Carbon::parse($request->reminder) < Carbon::now()){
+        return redirect()->back()->with('error', 'reminder jangan lebih mundur dari waktu sekarang');
     }else{
         Task::create([
             'name' => $request->name,

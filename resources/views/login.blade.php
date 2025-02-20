@@ -64,6 +64,22 @@
                 <div class="card">
                     <div class="card-body text-center">
                         <h2 class="mb-4" style="color: #1976d2;">Login </h2>
+                        @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <!-- Menampilkan pesan sukses -->
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
                         <p class="mb-4" style="color: #555;">Silahkan masuk dengan akun yang sudah terdaftar</p>
                         <form method="POST" action="{{ route('login.submit') }}">
                             @csrf
@@ -90,5 +106,13 @@
 
     <!-- Bootstrap JS Bundle (popper.js included) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.alert').forEach(function (alert) {
+       alert.style.cursor = 'pointer';
+       alert.addEventListener('click', function () {
+           alert.style.display = 'none'; 
+       });
+   });
+   </script>
 </body>
 </html>

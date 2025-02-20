@@ -18,12 +18,12 @@ class SendTaskReminders extends Command
         Log::info('Mulai mengirim reminder'); // Tambah ini
         $now = Carbon::now();
         $tasks = Task::where('status', 'belum')
-            ->where('keterangan_reminder', false)
-            ->where(function ($query) use ($now) {
-                $query->whereDate('reminder', $now->toDateString())
-                      ->orWhereDate('tenggat_waktu', $now->copy()->addDays(2)->toDateString());
-            })
-            ->get();
+        ->where('keterangan_reminder', false)
+        ->where(function ($query) use ($now) {
+            $query->where('reminder', '<=', $now) // Pakai datetime penuh
+                  ->orWhereDate('tenggat_waktu', $now->copy()->addDays(2)->toDateString());
+        })
+        ->get();
     
         Log::info('Jumlah tugas yang perlu dikirim: ' . $tasks->count()); // Tambah ini
         // Di dalam method handle() command
