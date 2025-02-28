@@ -74,7 +74,7 @@
             @foreach($user as $index => $user)
             <div class="leaderboard-card">
                 <span class="rank">{{ $index + 1 }}</span>
-                <img src="{{ asset('storage/' . $user->profile_pic) }}" alt="Profile" class="profile-pic">
+                <img src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random&color=fff' }}" alt="Profile" class="profile-pic">
                 <div class="leaderboard-info">
                     <h5>{{ $user->name }}</h5>
                     <p>Score: {{ $user->skor }}</p>

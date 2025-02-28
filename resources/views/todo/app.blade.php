@@ -185,6 +185,11 @@
                 {{ session('error') }}
             </div>
             @endif
+            @if (session('warning'))
+            <div class="alert alert-warning mx-1" id="warning-alert">
+                {{ session('warning') }}
+            </div>
+            @endif
             <div class="card-body" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
         
                 <form action="{{ route('tasks.store') }}" method="POST">
@@ -199,11 +204,11 @@
         
                     <div class="mb-3 w-50">
                         <label for="tenggat_waktu" class="form-label">Tenggat waktu</label>
-                        <input type="datetime-local" class="form-control" id="tenggat_waktu" name="tenggat_waktu" required>
+                        <input type="datetime-local" class="form-control" id="tenggat_waktu" name="tenggat_waktu" oninput="this.blur()" required>
                     </div>
                     <div class="mb-3 w-50">
                         <label for="reminder" class="form-label">Reminder</label>
-                        <input type="datetime-local" class="form-control" id="reminder" name="reminder" required>
+                        <input type="datetime-local" class="form-control" id="reminder" name="reminder" oninput="this.blur()" required>
                     </div>
         
                     <div class="mb-3">
@@ -223,6 +228,7 @@
         </div>
 
 
+        {{-- sort fitur --}}
             <form method="GET" action="{{ route('tasks.index') }}">
                 <div class="form-group my-2">
                     <label for="sortOptions">Sort By</label>
@@ -270,23 +276,23 @@
                         @csrf
                         @method('put')
                         @if($task->status == 'belum')
-                        <button class="btn btn-success btn-sm">
+                        <button class="btn btn-success btn-sm" title="Selesaikan">
                             ✔
                         </button>
                         @endif
                     </form>
                     @if($task->status == 'belum')
-                    <button class="btn btn-edit btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editTaskModal-{{ $task->id }}">
+                    <button class="btn btn-edit btn-primary btn-sm" title="Edit" data-bs-toggle="modal" data-bs-target="#editTaskModal-{{ $task->id }}">
                         ✎
                     </button>
                     @endif
                     @if($task->status == 'belum')
-                    <button class="btn btn-edit btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#subtaskModal-{{ $task->id }}">
+                    <button class="btn btn-edit btn-primary btn-sm" title="Tambah Subtugas" data-bs-toggle="modal" data-bs-target="#subtaskModal-{{ $task->id }}">
                         +
                     </button>
                     @endif
                     
-                    <button class="btn btn-edit btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#subtaskViewModal-{{ $task->id }}">
+                    <button class="btn btn-edit btn-primary btn-sm" title="Lihat" data-bs-toggle="modal" data-bs-target="#subtaskViewModal-{{ $task->id }}">
                         <i class="fa fa-eye" aria-hidden="true"></i>
                     </button>
                    
@@ -295,7 +301,7 @@
                     <form action="{{ route('tasks.delete', $task->id) }}" method="POST">
                         @csrf
                         @method('delete')
-                        <button class="btn btn-danger btn-sm">✕</button>
+                        <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
                     </form>
                 </div>
             </li>
@@ -325,7 +331,11 @@
 
                     <div class="mb-3">
                         <label for="tenggat_waktu" class="form-label">Tenggat Waktu</label>
-                        <input type="datetime-local" class="form-control" id="taskDeadline" name="tenggat_waktu" value="{{ \Carbon\Carbon::parse($task->tenggat_waktu)->format('Y-m-d\TH:i') }}" >
+                        <input type="datetime-local" class="form-control" id="taskDeadline" oninput="this.blur()" name="tenggat_waktu" value="{{ \Carbon\Carbon::parse($task->tenggat_waktu)->format('Y-m-d\TH:i') }}" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="reminder" class="form-label">Reminder</label>
+                        <input type="datetime-local" class="form-control" id="taskReminder" oninput="this.blur()" name="reminder" value="{{ \Carbon\Carbon::parse($task->reminder)->format('Y-m-d\TH:i') }}" >
                     </div>
 
                     <div class="mb-3">
@@ -368,7 +378,7 @@
                                 @csrf
                                 <div class="input-group mb-3">
                                     <input type="text" class="form-control" name="name" placeholder="Tambah subtask baru" required>
-                                    <input type="datetime-local" class="form-control" name="tenggat_waktu">
+                                    <input type="datetime-local" class="form-control" oninput="this.blur()" name="tenggat_waktu">
                                     <button class="btn btn-primary" type="submit">Tambah</button>
                                 </div>
                             </form>
@@ -392,13 +402,13 @@
                                             @csrf
                                             @method('put')
                                             @if($subtask->status == 'belum')
-                                            <button class="btn btn-success btn-sm">
+                                            <button class="btn btn-success btn-sm" title="Selesai">
                                                 ✔
                                             </button>
                                             @endif
                                         </form>
                                         @if($subtask->status == 'belum')
-                                        <button class="btn btn-subtask btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editSubtaskModal-{{ $subtask->id }}">
+                                        <button class="btn btn-subtask btn-primary btn-sm" title="Edit" data-bs-toggle="modal" data-bs-target="#editSubtaskModal-{{ $subtask->id }}">
                                             ✎
                                         </button>
                                         @endif
@@ -407,7 +417,7 @@
                                         <form action="{{ route('subtasks.delete', $subtask->id) }}" method="POST">
                                             @csrf
                                             @method('delete')
-                                            <button class="btn btn-danger btn-sm">✕</button>
+                                            <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
                                         </form>
                                     </div>
                                 </li>
@@ -456,7 +466,7 @@
                                             @csrf
                                             @method('put')
                                             @if($subtask->status == 'belum')
-                                            <button class="btn btn-success btn-sm">
+                                            <button class="btn btn-success btn-sm" title="Selesai">
                                                 ✔
                                             </button>
                                             @endif
@@ -466,7 +476,7 @@
                                         <form action="{{ route('subtasks.delete', $subtask->id) }}" method="POST">
                                             @csrf
                                             @method('delete')
-                                            <button class="btn btn-danger btn-sm">✕</button>
+                                            <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
                                         </form>
                                     </div>
                                 </li>
@@ -482,7 +492,7 @@
 
 
 
-
+            {{-- edit subtugas --}}
             @foreach ($task->subtasks as $subtask)
             <div class="modal fade" id="editSubtaskModal-{{ $subtask->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
@@ -503,7 +513,7 @@
             
                                 <div class="mb-3">
                                     <label for="tenggat_waktu" class="form-label">Tenggat Waktu</label>
-                                    <input type="datetime-local" class="form-control" name="tenggat_waktu" value="{{ \Carbon\Carbon::parse($subtask->tenggat_waktu)->format('Y-m-d\TH:i') }}">
+                                    <input type="datetime-local" class="form-control" name="tenggat_waktu" oninput="this.blur()" value="{{ \Carbon\Carbon::parse($subtask->tenggat_waktu)->format('Y-m-d\TH:i') }}">
                                 </div>
             
                                 <div class="text-center">
@@ -602,7 +612,50 @@
             }, 300);
         }
     }
+
+    
+
+    
+
+
+    
 </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("form[action*='subtasks.edit']").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault(); // Hindari reload halaman
+
+                let formData = new FormData(this);
+                let actionUrl = this.getAttribute("action");
+
+                fetch(actionUrl, {
+                    method: "POST",
+                    body: formData
+                }).then(response => response.json())
+                  .then(data => {
+                      if (data.success) {
+                          // Tutup Modal 2 (Edit Subtask)
+                          let editModal = bootstrap.Modal.getInstance(this.closest(".modal"));
+                          editModal.hide();
+
+                          // Tunggu animasi modal tertutup, lalu buka Modal 1 (Subtask Modal)
+                          setTimeout(() => {
+                              let subtaskModal = new bootstrap.Modal(document.getElementById('subtaskModal-' + data.task_id));
+                              subtaskModal.show();
+                          }, 500);
+
+                          // Perbarui tampilan subtugas (kalau mau real-time tanpa refresh)
+                          location.reload();
+                      }
+                  }).catch(error => console.error("Error:", error));
+            });
+        });
+    });
+</script>
+
+
 {{-- <script>
     const h3 = document.querySelector('h3');
     const cardBody = document.querySelector('.card-body');

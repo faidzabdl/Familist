@@ -1,11 +1,30 @@
+{{-- <form action="{{ route('password.update') }}" method="POST">
+    @csrf
+    <input type="hidden" name="token" value="{{ $token }}">
+    <input type="hidden" name="email" value="{{ $email }}">
+    
+    <input type="password" name="password" required placeholder="Password Baru">
+    <input type="password" name="password_confirmation" required placeholder="Konfirmasi Password">
+    
+    <button type="submit">Reset Password</button>
+</form>
+
+@if ($errors->any())
+    <div>
+        @foreach ($errors->all() as $error)
+            <p>{{ $error }}</p>
+        @endforeach
+    </div>
+@endif --}}
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login FamiList</title>
-    <!-- Bootstrap CSS -->
+    <title>Ganti Password</title>
     <link rel="icon" href="{{ asset('images/favicon(2)-32x32.png') }}" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -63,7 +82,7 @@
             <div class="col-md-5">
                 <div class="card">
                     <div class="card-body text-center">
-                        <h2 class="mb-4" style="color: #1976d2;">Login </h2>
+                        <h2 class="mb-4" style="color: #1976d2;">GANTI PASSWORD </h2>
                         @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul>
@@ -80,26 +99,25 @@
                             {{ session('success') }}
                         </div>
                     @endif
-                        <p class="mb-4" style="color: #555;">Silahkan masuk dengan akun yang sudah terdaftar</p>
-                        <form method="POST" action="{{ route('login.submit') }}">
+                        <p class="mb-4" style="color: #555;">Silahkan masukkan password baru</p>
+                        <form method="POST" action="{{ route('password.update') }}">
                             @csrf
+                            <input type="hidden" name="token" value="{{ $token }}">
+                            <input type="hidden" name="email" value="{{ $email }}">
                             <div class="mb-3">
-                                <input type="text" name="email" class="form-control" placeholder="Email Address" required>
+                                <input type="password" name="password" class="form-control" required placeholder="Password Baru">
                             </div>
                             <div class="mb-3">
-                                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                                <input type="password" name="password_confirmation" class="form-control" required placeholder="Konfirmasi Password">
                             </div>
-                            <button class="btn btn-primary w-100">LOGIN</button>
+                            <button class="btn btn-primary w-100">UBAH</button>
                         </form>
-                        <p class="mt-3">
-                            <a href="{{ route('password.request') }}">Lupa password ?</a>
-                        </p>
-                        <p class="mt-3">
-                            Belum punya akun?
-                            <a href="{{ route('registerasi.tampil') }}">Register &raquo;</a>
-                        </p>
-                        @if (session('gagal'))
-                            <p class="text-danger mt-3">{{ session('gagal') }}</p>
+                        @if ($errors->any())
+                            <div>
+                                @foreach ($errors->all() as $error)
+                                    <p>{{ $error }}</p>
+                                @endforeach
+                            </div>
                         @endif
                     </div>
                 </div>
