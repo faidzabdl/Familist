@@ -32,7 +32,7 @@
             <div class="offcanvas-header">
                 <a href="{{ route('profile.index') }}" class="offcanvas-title text-decoration-none text-light hover-text-primary d-flex align-items-center" id="offcanvasDarkNavbarLabel">
                     <img 
-                        src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : 'https://via.placeholder.com/40' }}" 
+                        src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random&color=fff' }}" 
                         alt="Profile Picture" 
                         class="rounded-circle me-2" 
                         style="width: 35px; height: 35px; object-fit: cover;">

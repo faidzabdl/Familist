@@ -185,21 +185,42 @@
                 {{ session('error') }}
             </div>
             @endif
+            @if (session('errorTD'))
+            <div class="alert alert-danger mx-1" id="error-alert">
+                {{ session('errorTD') }}
+            </div>
+            @endif
+            @if (session('errorD'))
+            <div class="alert alert-danger mx-1" id="error-alert">
+                {{ session('errorD') }}
+            </div>
+            @endif
             @if (session('warning'))
             <div class="alert alert-warning mx-1" id="warning-alert">
                 {{ session('warning') }}
             </div>
             @endif
-            <div class="card-body" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
+            @if ($errors->any())
+                <script>
+                    sessionStorage.setItem('showForm', 'true');
+                </script>
+            @endif
+            @if (session('error'))
+                <script>
+                    sessionStorage.setItem('showForm', 'true');
+                </script>
+            @endif
+
+            <div class="card-body" id="card-body" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
         
                 <form action="{{ route('tasks.store') }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <input type="text" class="form-control" id="deskripsi" name="name" placeholder="Tambah tugas baru" required>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Nama tugas" value="{{ old('name') }}" required>
                     </div>
         
                     <div class="mb-3">
-                        <input type="text" class="form-control" id="deskripsi" name="deskripsi" placeholder="Deskripsi"/>
+                        <input type="text" class="form-control" id="deskripsi" name="deskripsi" placeholder="Deskripsi" value="{{ old('deskripsi') }}">
                     </div>
         
                     <div class="mb-3 w-50">
@@ -214,9 +235,9 @@
                     <div class="mb-3">
                         <label for="prioritas" class="form-label">Prioritas</label>
                         <select class="form-select" id="prioritas" name="prioritas">
-                            <option value="1">Prioritas 1</option>
-                            <option value="2">Prioritas 2</option>
-                            <option value="3">Prioritas 3</option>
+                            <option value="1" {{ old('prioritas') == '1' ? 'selected' : '' }}>Prioritas 1</option>
+                            <option value="2" {{ old('prioritas') == '2' ? 'selected' : '' }}>Prioritas 2</option>
+                            <option value="3" {{ old('prioritas') == '3' ? 'selected' : '' }}>Prioritas 3</option>
                         </select>
                     </div>
         
@@ -250,111 +271,111 @@
             </form>
 
             <!-- Task List -->
-<div class="card">
-    <div class="card-body cursor-pointer">
-        <ul class="list-group">
-            @if ($tasks->isEmpty())
-            <li class="list-group-item">Tidak ada tugas</li>
-        @else
-            @foreach ($tasks as $task)
-            <li class="list-group-item d-flex align-items-start"  >
-                <div class="d-flex flex-column">
-                    <span>
-                        @if($task->status == "selesai")
-                        <del>{{ $task->name }}</del>
-                        @elseif($task->status == 'terlambat')
-                        <del class="text-danger">{{ $task->name }} (Terlambat)</del>
-                        @else
-                        {{ $task->name }}
-                        @endif
-                    </span>
+            <div class="card">
+                <div class="card-body cursor-pointer">
+                    <ul class="list-group">
+                        @if ($tasks->isEmpty())
+                        <li class="list-group-item">Tidak ada tugas</li>
+                    @else
+                        @foreach ($tasks as $task)
+                        <li class="list-group-item d-flex align-items-start"  >
+                            <div class="d-flex flex-column">
+                                <span>
+                                    @if($task->status == "selesai")
+                                    <del>{{ $task->name }}</del>
+                                    @elseif($task->status == 'terlambat')
+                                    <del class="text-danger">{{ $task->name }} (Terlambat)</del>
+                                    @else
+                                    {{ $task->name }}
+                                    @endif
+                                </span>
+                            </div>
+
+                            <div class="btn-group mt-2 ms-auto">
+                                <!-- Mark as Done/Undone -->
+                                <form action="{{ route('tasks.toggle-done', $task->id) }}" method="POST">
+                                    @csrf
+                                    @method('put')
+                                    @if($task->status == 'belum')
+                                    <button class="btn btn-success btn-sm" title="Selesaikan">
+                                        ✔
+                                    </button>
+                                    @endif
+                                </form>
+                                @if($task->status == 'belum')
+                                <button class="btn btn-edit btn-primary btn-sm" title="Edit" data-bs-toggle="modal" data-bs-target="#editTaskModal-{{ $task->id }}">
+                                    ✎
+                                </button>
+                                @endif
+                                @if($task->status == 'belum')
+                                <button class="btn btn-edit btn-primary btn-sm" title="Tambah Subtugas" data-bs-toggle="modal" data-bs-target="#subtaskModal-{{ $task->id }}">
+                                    +
+                                </button>
+                                @endif
+                                
+                                <button class="btn btn-edit btn-primary btn-sm" title="Lihat" data-bs-toggle="modal" data-bs-target="#subtaskViewModal-{{ $task->id }}">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                            
+
+                                <!-- Delete Task -->
+                                <form action="{{ route('tasks.delete', $task->id) }}" method="POST">
+                                    @csrf
+                                    @method('delete')
+                                    <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
+                                </form>
+                            </div>
+                        </li>
+
+                        <!-- Edit Task Modal -->
+            <div class="modal fade" id="editTaskModal-{{ $task->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editTaskModalLabel">Edit Task - {{ $task->name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Form Edit Task -->
+                            <form action="{{ route('tasks.edit', $task->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Nama Tugas</label>
+                                    <input type="text" class="form-control" id="taskName" name="name" value="{{ $task->name }}" >
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="deskripsi" class="form-label">Deskripsi</label>
+                                    <textarea class="form-control" id="taskDescription" name="deskripsi" rows="3" required>{{ $task->deskripsi }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="tenggat_waktu" class="form-label">Tenggat Waktu</label>
+                                    <input type="datetime-local" class="form-control" id="taskDeadline" oninput="this.blur()" name="tenggat_waktu" value="{{ \Carbon\Carbon::parse($task->tenggat_waktu)->format('Y-m-d\TH:i') }}" >
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reminder" class="form-label">Reminder</label>
+                                    <input type="datetime-local" class="form-control" id="taskReminder" oninput="this.blur()" name="reminder" value="{{ \Carbon\Carbon::parse($task->reminder)->format('Y-m-d\TH:i') }}" >
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="taskPriority" class="form-label">Prioritas</label>
+                                    <select class="form-select" id="taskPriority" name="prioritas" >
+                                        <option value="1" {{ $task->prioritas == 1 ? 'selected' : '' }}>Prioritas 1</option>
+                                        <option value="2" {{ $task->prioritas == 2 ? 'selected' : '' }}>Prioritas 2</option>
+                                        <option value="3" {{ $task->prioritas == 3 ? 'selected' : '' }}>Prioritas 3</option>
+                                    </select>
+                                </div>
+
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary">Simpan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="btn-group mt-2 ms-auto">
-                    <!-- Mark as Done/Undone -->
-                    <form action="{{ route('tasks.toggle-done', $task->id) }}" method="POST">
-                        @csrf
-                        @method('put')
-                        @if($task->status == 'belum')
-                        <button class="btn btn-success btn-sm" title="Selesaikan">
-                            ✔
-                        </button>
-                        @endif
-                    </form>
-                    @if($task->status == 'belum')
-                    <button class="btn btn-edit btn-primary btn-sm" title="Edit" data-bs-toggle="modal" data-bs-target="#editTaskModal-{{ $task->id }}">
-                        ✎
-                    </button>
-                    @endif
-                    @if($task->status == 'belum')
-                    <button class="btn btn-edit btn-primary btn-sm" title="Tambah Subtugas" data-bs-toggle="modal" data-bs-target="#subtaskModal-{{ $task->id }}">
-                        +
-                    </button>
-                    @endif
-                    
-                    <button class="btn btn-edit btn-primary btn-sm" title="Lihat" data-bs-toggle="modal" data-bs-target="#subtaskViewModal-{{ $task->id }}">
-                        <i class="fa fa-eye" aria-hidden="true"></i>
-                    </button>
-                   
-
-                    <!-- Delete Task -->
-                    <form action="{{ route('tasks.delete', $task->id) }}" method="POST">
-                        @csrf
-                        @method('delete')
-                        <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
-                    </form>
-                </div>
-            </li>
-
-            <!-- Edit Task Modal -->
-<div class="modal fade" id="editTaskModal-{{ $task->id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editTaskModalLabel">Edit Task - {{ $task->name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <!-- Form Edit Task -->
-                <form action="{{ route('tasks.edit', $task->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nama Task</label>
-                        <input type="text" class="form-control" id="taskName" name="name" value="{{ $task->name }}" >
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="deskripsi" class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="taskDescription" name="deskripsi" rows="3" required>{{ $task->deskripsi }}</textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="tenggat_waktu" class="form-label">Tenggat Waktu</label>
-                        <input type="datetime-local" class="form-control" id="taskDeadline" oninput="this.blur()" name="tenggat_waktu" value="{{ \Carbon\Carbon::parse($task->tenggat_waktu)->format('Y-m-d\TH:i') }}" >
-                    </div>
-                    <div class="mb-3">
-                        <label for="reminder" class="form-label">Reminder</label>
-                        <input type="datetime-local" class="form-control" id="taskReminder" oninput="this.blur()" name="reminder" value="{{ \Carbon\Carbon::parse($task->reminder)->format('Y-m-d\TH:i') }}" >
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="taskPriority" class="form-label">Prioritas</label>
-                        <select class="form-select" id="taskPriority" name="prioritas" >
-                            <option value="1" {{ $task->prioritas == 1 ? 'selected' : '' }}>Prioritas 1</option>
-                            <option value="2" {{ $task->prioritas == 2 ? 'selected' : '' }}>Prioritas 2</option>
-                            <option value="3" {{ $task->prioritas == 3 ? 'selected' : '' }}>Prioritas 3</option>
-                        </select>
-                    </div>
-
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 
             <!-- Subtask Modal -->
@@ -371,14 +392,29 @@
                             </div>
                             <button type="button" class="btn-close btn-sm position-absolute top-0 end-0" data-bs-dismiss="modal"></button>
                         </div>
+                        @if (session('successES'))
+                        <div class="alert alert-success mx-1" id="success-alert">
+                            {{ session('successES') }}
+                        </div>
+                        @endif
+                        @if (session('errorES'))
+                        <div class="alert alert-danger mx-1" id="error-alert">
+                            {{ session('errorES') }}
+                        </div>
+                        @endif
+                        @if (session('warningES'))
+                        <div class="alert alert-warning mx-1" id="warning-alert">
+                            {{ session('warningES') }}
+                        </div>
+                        @endif
                         
                         <div class="modal-body">
                             <!-- Form Tambah Subtask -->
                             <form action="{{ route('subtasks.store', $task->id) }}" method="POST">
                                 @csrf
                                 <div class="input-group mb-3">
-                                    <input type="text" class="form-control" name="name" placeholder="Tambah subtask baru" required>
-                                    <input type="datetime-local" class="form-control" oninput="this.blur()" name="tenggat_waktu">
+                                    <input type="text" class="form-control" name="name" placeholder="Nama subtugas" required>
+                                    <input type="datetime-local" class="form-control" oninput="this.blur()" name="tenggat_waktu" required>
                                     <button class="btn btn-primary" type="submit">Tambah</button>
                                 </div>
                             </form>
@@ -386,7 +422,7 @@
                             <!-- Daftar Subtask -->
                             <ul class="list-group">
                                
-                                @foreach ($task->subtasks as $subtask)
+                                @foreach ($task->subtasks->sortByDesc('created_at') as $subtask)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>
                                         @if($subtask->status == "selesai")
@@ -402,6 +438,7 @@
                                             @csrf
                                             @method('put')
                                             @if($subtask->status == 'belum')
+                                            <input type="hidden" name="modal_origin" value="subtaskModal">
                                             <button class="btn btn-success btn-sm" title="Selesai">
                                                 ✔
                                             </button>
@@ -417,6 +454,7 @@
                                         <form action="{{ route('subtasks.delete', $subtask->id) }}" method="POST">
                                             @csrf
                                             @method('delete')
+                                            <input type="hidden" name="modal_origin" value="subtaskModal">
                                             <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
                                         </form>
                                     </div>
@@ -450,7 +488,7 @@
                                 @if ($task->subtasks->isEmpty())
                                 <li class="list-group-item d-flex justify-content-between align-items-center">Tidak ada subtugas</li>
                                 @else
-                                @foreach ($task->subtasks as $subtask)
+                                @foreach ($task->subtasks->sortByDesc('created_at') as $subtask)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>
                                         @if($subtask->status == "selesai")
@@ -466,6 +504,7 @@
                                             @csrf
                                             @method('put')
                                             @if($subtask->status == 'belum')
+                                            <input type="hidden" name="modal_origin" value="subtaskViewModal">
                                             <button class="btn btn-success btn-sm" title="Selesai">
                                                 ✔
                                             </button>
@@ -476,6 +515,7 @@
                                         <form action="{{ route('subtasks.delete', $subtask->id) }}" method="POST">
                                             @csrf
                                             @method('delete')
+                                            <input type="hidden" name="modal_origin" value="subtaskViewModal">
                                             <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
                                         </form>
                                     </div>
@@ -506,6 +546,7 @@
                             <form action="{{ route('subtasks.edit', $subtask->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
+                                
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Nama Sub task</label>
                                     <input type="text" class="form-control" name="name" value="{{ $subtask->name }}">
@@ -536,47 +577,47 @@
             @endif
         </ul>
 
-<!-- Pagination -->
-<div class="mt-3 flex justify-center">
-    <ul class="pagination">
-        {{-- Previous Button --}}
-        @if ($tasks->onFirstPage())
-            <li class="page-item disabled">
-                <span class="page-link">«</span>
-            </li>
-        @else
-            <li class="page-item">
-                <a href="{{ $tasks->previousPageUrl() }}" class="page-link">«</a>
-            </li>
-        @endif
-
-        {{-- Page Numbers --}}
-        @foreach(range(1, $tasks->lastPage()) as $i)
-            @if ($i == 1 || $i == $tasks->lastPage() || ($i >= $tasks->currentPage() - 2 && $i <= $tasks->currentPage() + 2))
-            <li class="page-item {{ $i == $tasks->currentPage() ? 'active' : '' }}">
-                <a href="{{ $tasks->url($i) }}" class="page-link">
-                    {{ $i }}
-                </a>
-            </li>            
-            @elseif ($i == 2 || $i == $tasks->lastPage() - 1)
+    <!-- Pagination -->
+    <div class="mt-3 flex justify-center">
+        <ul class="pagination">
+            {{-- Previous Button --}}
+            @if ($tasks->onFirstPage())
+                <li class="page-item disabled">
+                    <span class="page-link">«</span>
+                </li>
+            @else
                 <li class="page-item">
-                    <span class="page-link">...</span>
+                    <a href="{{ $tasks->previousPageUrl() }}" class="page-link">«</a>
                 </li>
             @endif
-        @endforeach
 
-        {{-- Next Button --}}
-        @if ($tasks->hasMorePages())
-            <li class="page-item">
-                <a href="{{ $tasks->nextPageUrl() }}" class="page-link">»</a>
-            </li>
-        @else
-            <li class="page-item disabled">
-                <span class="page-link">»</span>
-            </li>
-        @endif
-    </ul>
-</div>
+            {{-- Page Numbers --}}
+            @foreach(range(1, $tasks->lastPage()) as $i)
+                @if ($i == 1 || $i == $tasks->lastPage() || ($i >= $tasks->currentPage() - 2 && $i <= $tasks->currentPage() + 2))
+                <li class="page-item {{ $i == $tasks->currentPage() ? 'active' : '' }}">
+                    <a href="{{ $tasks->url($i) }}" class="page-link">
+                        {{ $i }}
+                    </a>
+                </li>            
+                @elseif ($i == 2 || $i == $tasks->lastPage() - 1)
+                    <li class="page-item">
+                        <span class="page-link">...</span>
+                    </li>
+                @endif
+            @endforeach
+
+            {{-- Next Button --}}
+            @if ($tasks->hasMorePages())
+                <li class="page-item">
+                    <a href="{{ $tasks->nextPageUrl() }}" class="page-link">»</a>
+                </li>
+            @else
+                <li class="page-item disabled">
+                    <span class="page-link">»</span>
+                </li>
+            @endif
+        </ul>
+    </div>
 
 
 
@@ -598,8 +639,16 @@
         });
     });
 
-    function munculFormTask() {
+    function munculFormTask(forceOpen = false) {
         const cardBody = document.querySelector('.card-body');
+        if (forceOpen) {
+            cardBody.style.display = 'block';
+            setTimeout(() => {
+                cardBody.style.opacity = '1';
+            }, 10);
+            return;
+        }
+
         if (cardBody.style.display === 'none' || cardBody.style.display === '') {
             cardBody.style.display = 'block';
             setTimeout(() => {
@@ -613,6 +662,15 @@
         }
     }
 
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (sessionStorage.getItem("showForm") === "true") {
+            munculFormTask(true); // Gunakan parameter untuk buka paksa
+            sessionStorage.removeItem("showForm"); // Hapus supaya tidak terus muncul
+        }
+    });
+
+
     
 
     
@@ -622,37 +680,35 @@
 </script>
 
 <script>
+ 
     document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll("form[action*='subtasks.edit']").forEach(form => {
-            form.addEventListener("submit", function (event) {
-                event.preventDefault(); // Hindari reload halaman
-
-                let formData = new FormData(this);
-                let actionUrl = this.getAttribute("action");
-
-                fetch(actionUrl, {
-                    method: "POST",
-                    body: formData
-                }).then(response => response.json())
-                  .then(data => {
-                      if (data.success) {
-                          // Tutup Modal 2 (Edit Subtask)
-                          let editModal = bootstrap.Modal.getInstance(this.closest(".modal"));
-                          editModal.hide();
-
-                          // Tunggu animasi modal tertutup, lalu buka Modal 1 (Subtask Modal)
-                          setTimeout(() => {
-                              let subtaskModal = new bootstrap.Modal(document.getElementById('subtaskModal-' + data.task_id));
-                              subtaskModal.show();
-                          }, 500);
-
-                          // Perbarui tampilan subtugas (kalau mau real-time tanpa refresh)
-                          location.reload();
-                      }
-                  }).catch(error => console.error("Error:", error));
-            });
-        });
+        @if(session('SopenSubtaskModal'))
+            var taskId = "{{ session('SopenSubtaskModal') }}"; // Ambil task ID dari session
+            var subtaskModal = new bootstrap.Modal(document.getElementById("subtaskModal-" + taskId));
+            subtaskModal.show();
+        @endif
     });
+
+    document.addEventListener("DOMContentLoaded", function() {
+    let openModal = "{{ session('openSubtaskModal') }}"; // Contoh: "subtaskViewModal-5"
+    
+    if (openModal) {
+        let modalParts = openModal.split("-");
+        let modalId = modalParts[0];  // "subtaskModal" atau "subtaskViewModal"
+        let taskId = modalParts[1];   // ID tugas
+
+        let targetModal = document.getElementById(modalId + "-" + taskId);
+        if (targetModal) {
+            let modalInstance = new bootstrap.Modal(targetModal);
+            modalInstance.show();
+        }
+    }
+});
+
+
+
+
+
 </script>
 
 

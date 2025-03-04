@@ -115,11 +115,11 @@ class TaskController extends Controller
         ]);
 
         if ($request->tenggat_waktu < Carbon::now()) {
-            return redirect()->back()->with('error', 'waktu deadline harus lebih dari waktu sekarang');
+            return redirect()->back()->withInput()->with('error', 'tenggat waktu harus lebih dari waktu sekarang');
         } elseif (Carbon::parse($request->reminder) > Carbon::parse($request->tenggat_waktu)) {
-            return redirect()->back()->with('error', 'reminder jangan lebih maju dari tenggat waktu');
+            return redirect()->back()->withInput()->with('error', 'reminder jangan lebih maju dari tenggat waktu');
         } elseif (Carbon::parse($request->reminder) < Carbon::now()) {
-            return redirect()->back()->with('error', 'reminder jangan lebih mundur dari waktu sekarang');
+            return redirect()->back()->withInput()->with('error', 'reminder jangan lebih mundur dari waktu sekarang');
         } else {
             Task::create([
                 'name' => $request->name,
@@ -134,7 +134,7 @@ class TaskController extends Controller
 
 
 
-        return redirect()->back()->with('success', 'Task berhasil di buat');
+        return redirect()->back()->with('success', 'Tugas berhasil di buat');
     }
 
     public function destroy(string $id)
@@ -145,35 +145,36 @@ class TaskController extends Controller
 
         foreach ($subtasks as $subtask) {
             if ($subtask->status == 'belum') {
-                return redirect()->back()->with('error', 'Ada sub tugas yang belum selesai');
+                return redirect()->back()->with('errorD', 'Ada sub tugas yang belum selesai');
             }
         }
 
         if ($task->status == "belum") {
-            return redirect()->back()->with('error', 'Tugas belum selesai');
+            return redirect()->back()->with('errorD', 'Tugas belum selesai');
         }
 
 
         Task::where('id', $id)->delete();
         Subtask::where('task_id', $id)->delete();
 
-        return redirect()->back()->with('warning', 'Berhasil menghapus data');
+        return redirect()->back()->with('warning', 'Berhasil menghapus tugas dan subtugas');
     }
 
 
     public function subtaskStore(Request $request, Task $task)
     {
+        $subtask = new Subtask();
         $request->validate([
             'name' => 'required',
             'tenggat_waktu' => 'required|date',
         ]);
 
         if (strtotime($request->tenggat_waktu) < strtotime(Carbon::now()->format('Y-m-d'))) {
-            return redirect()->back()->with('error', 'Tenggat waktu subtask tidak boleh di masa lalu.');
+            return redirect()->back()->with('errorES', 'Tenggat waktu subtugas tidak boleh di masa lalu.')->with('SopenSubtaskModal', $task->id);
         }
 
         if (strtotime($request->tenggat_waktu) > strtotime($task->tenggat_waktu)) {
-            return redirect()->back()->with('error', 'Tenggat waktu subtask tidak boleh lebih dari tenggat waktu task.');
+            return redirect()->back()->with('errorES', 'Tenggat waktu subtugas tidak boleh lebih dari tenggat waktu tugas')->with('SopenSubtaskModal', $task->id);
         }
 
 
@@ -182,7 +183,7 @@ class TaskController extends Controller
             'tenggat_waktu' => $request->tenggat_waktu,
         ]);
 
-        return redirect()->back()->with('success', 'Subtask berhasil di tambahkan');
+        return redirect()->back()->with('successES', 'Subtugas berhasil di tambahkan')->with('SopenSubtaskModal', $task->id);
     }
 
 
@@ -193,7 +194,7 @@ class TaskController extends Controller
         $subtaskBelumSelesai = $task->subtasks()->where('status', 'belum')->exists();
 
         if ($subtaskBelumSelesai) {
-            return redirect()->back()->with('error', 'Masih ada subtask yang belum selesai!');
+            return redirect()->back()->with('errorTD', 'Masih ada subtask yang belum selesai!');
         }
         if ($task->status == 'belum') {
             $task->update([
@@ -209,25 +210,36 @@ class TaskController extends Controller
     }
 
 
-    public function subtaskToggleDone(Subtask $subtask)
-    {
-
-        if ($subtask->status == 'belum') {
-            $subtask->update([
-                'status' => 'selesai',
-                'keterangan_skor' => true
-            ]);
-            $user = $subtask->task->user;
-            $user->increment('skor', 5);
-        }
-
-        return redirect()->back();
+    public function subtaskToggleDone(Request $request, Subtask $subtask)
+{
+    if ($subtask->status == 'belum') {
+        $subtask->update([
+            'status' => 'selesai',
+            'keterangan_skor' => true
+        ]);
+        $user = $subtask->task->user;
+        $user->increment('skor', 5);
     }
 
-    public function deleteSubtask(Subtask $subtask)
+    // Tangkap modal asal dari request
+    $modalOrigin = $request->input('modal_origin', 'subtaskModal');
+
+    return redirect()->back()
+        ->with('successES', 'Sub tugas berhasil diselesaikan')
+        ->with('openSubtaskModal', $modalOrigin . '-' . $subtask->task_id);
+}
+
+
+    public function deleteSubtask(Request $request, Subtask $subtask)
     {
-        $subtask->delete();
-        return redirect()->back();
+        $modalOrigin = $request->input('modal_origin', 'subtaskModal');
+        if ($subtask->status == 'belum') {
+            return redirect()->back()->with('errorES', 'Sub tugas yang belum selesai tidak bisa di hapus')->with('openSubtaskModal', $modalOrigin . '-' . $subtask->task_id);
+        }else{
+            
+            $subtask->delete();
+            return redirect()->back()->with('openSubtaskModal', $modalOrigin . '-' . $subtask->task_id);
+        }
     }
 
     public function editTask(Request $request, $id)
@@ -283,12 +295,16 @@ class TaskController extends Controller
 
         $task = $subtask->task;
 
-        if (strtotime($request->tenggat_waktu) < strtotime(Carbon::now()->format('Y-m-d'))) {
-            return redirect()->back()->with('error', 'Tenggat waktu subtask tidak boleh di masa lalu.');
+        if($request->name == $subtask->name && strtotime($request->tenggat_waktu) == strtotime($subtask->tenggat_waktu)){
+            return redirect()->back()
+            ->with('warningES', 'sub tugas tidak ada yang berubah')
+            ->with('SopenSubtaskModal', $subtask->task_id);
         }
 
-        if (strtotime($request->tenggat_waktu) > strtotime($task->tenggat_waktu)) {
-            return redirect()->back()->with('error', 'Tenggat waktu subtask tidak boleh lebih dari tenggat waktu task.');
+        if (strtotime($request->tenggat_waktu) < strtotime(Carbon::now()->format('Y-m-d'))) {
+            return redirect()->back()->with('errorES', 'Tenggat waktu subtask tidak boleh di masa lalu.')->with('SopenSubtaskModal', $subtask->task_id);
+        }else if (strtotime($request->tenggat_waktu) > strtotime($task->tenggat_waktu)) {
+            return redirect()->back()->with('errorES', 'Tenggat waktu subtask tidak boleh lebih dari tenggat waktu task.')->with('SopenSubtaskModal', $subtask->task_id);
         }
 
         $subtask->update([
@@ -296,6 +312,12 @@ class TaskController extends Controller
             'tenggat_waktu' => $request->tenggat_waktu ?? $subtask->tenggat_waktu,
         ]);
 
-        return redirect()->back()->with('success', 'Subtasak berhasil di edit!');
+       
+
+        return redirect()->back()
+        ->with('successES', 'sub tugas berhasil diedit!')
+        ->with('SopenSubtaskModal', $subtask->task_id); // Simpan task ID yang harus dibuka
+    
+    
     }
 }

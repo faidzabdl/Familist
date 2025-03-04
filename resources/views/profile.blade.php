@@ -143,7 +143,7 @@
 
                 <div class="text-center mb-4">
                   
-                    <img src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : 'https://via.placeholder.com/150' }}" alt="Profile Picture" class="profile-pic" id="profilePreview">
+                    <img src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random&color=fff' }}" alt="Profile Picture" class="profile-pic" id="profilePreview">
                     <h3 class="mt-3">{{ $user->name }}</h3>
                     <p class="text-muted">{{ $user->email }}</p>
                 </div>

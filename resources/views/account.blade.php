@@ -124,9 +124,19 @@
                     {{ session('error') }}
                 </div>
                 @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger cursor-pointer">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
 
                 <div class="text-center mb-4">
-                    <img src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : 'https://via.placeholder.com/150' }}" alt="Profile Picture" class="profile-pic" id="profilePreview">
+                    <img src="{{ $user->profile_pic ? asset('storage/' . $user->profile_pic) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random&color=fff' }}" alt="Profile Picture" class="profile-pic" id="profilePreview">
                     <h3 class="mt-3">{{ $user->name }}</h3>
                     <p class="text-muted">{{ $user->email }}</p>
                 </div>
@@ -138,6 +148,7 @@
                     <div class="mb-3">
                         <label for="profilePicture" class="form-label">Ganti Foto Profile</label>
                         <input type="file" class="form-control" id="profilePicture" name="profile_pic" accept="image/*">
+                        
                     </div>
 
                     <div class="mb-3">
@@ -149,14 +160,28 @@
                         <label for="changeEmail" class="form-label">Ganti Email</label>
                         <input type="email" class="form-control" id="changeEmail" placeholder="Masukkan email baru" name="email">
                     </div>
+                    <div>
+                    
+                    
 
-                    <div class="mb-3">
-                        <label for="changePassword" class="form-label">Ganti Password</label>
-                        <input type="password" class="form-control" id="changePassword" placeholder="Masukkan paswword baru" name="password">
+                    <label class="form-label" onclick="munculFormTask()" style="font-family: 'Roboto', sans-serif; cursor: pointer;">Ganti Password</label>
+                    
+                    <div class="card-password" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
+                        <div class="mb-3">
+                            <input type="password" class="form-control" id="oldPassword" placeholder="Masukkan password lama" name="old_password">
+                        </div>
+                        <div class="mb-3">
+                           
+                            <input type="password" class="form-control" id="changePassword" placeholder="Masukkan password baru" name="password">
+                        </div>
+                        <div class="mb-3">
+                           
+                            <input type="password" class="form-control" id="changePassword" placeholder="Masukkan konfirmasi password baru" name="password_confirmation">
+                        </div>
                     </div>
 
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary w-100">Simpan perubahan</button>
+                        <button type="submit" class="btn btn-primary w-100 mt-4">Simpan perubahan</button>
                     </div>
                 </form>
             </div>
@@ -171,16 +196,40 @@
                 alert.style.display = 'none';
             });
         });
-    </script>
 
-    <script>
-        document.getElementById('profilePicture').addEventListener('change', function(event) {
+        function munculFormTask() {
+        const cardBody = document.querySelector('.card-password');
+        if (cardBody.style.display === 'none' || cardBody.style.display === '') {
+            cardBody.style.display = 'block';
+            setTimeout(() => {
+                cardBody.style.opacity = '1';
+            }, 10);
+        } else {
+            cardBody.style.opacity = '0';
+            setTimeout(() => {
+                cardBody.style.display = 'none';
+            }, 300);
+        }
+    }
+
+
+    document.getElementById('profilePicture').addEventListener('change', function(event) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('profilePreview').src = e.target.result;
             };
             reader.readAsDataURL(event.target.files[0]);
         });
+    </script>
+
+    <script>
+        // document.getElementById('profilePicture').addEventListener('change', function(event) {
+        //     const reader = new FileReader();
+        //     reader.onload = function(e) {
+        //         document.getElementById('profilePreview').src = e.target.result;
+        //     };
+        //     reader.readAsDataURL(event.target.files[0]);
+        // });
     </script>
 
 </body>
