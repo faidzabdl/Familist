@@ -162,29 +162,35 @@ class TaskController extends Controller
 
 
     public function subtaskStore(Request $request, Task $task)
-    {
-        $subtask = new Subtask();
-        $request->validate([
-            'name' => 'required',
-            'tenggat_waktu' => 'required|date',
-        ]);
+{
+    $request->validate([
+        'name' => 'required',
+        'tenggat_waktu' => 'required|date',
+    ]);
 
-        if (strtotime($request->tenggat_waktu) < strtotime(Carbon::now()->format('Y-m-d'))) {
-            return redirect()->back()->with('errorES', 'Tenggat waktu subtugas tidak boleh di masa lalu.')->with('SopenSubtaskModal', $task->id);
-        }
-
-        if (strtotime($request->tenggat_waktu) > strtotime($task->tenggat_waktu)) {
-            return redirect()->back()->with('errorES', 'Tenggat waktu subtugas tidak boleh lebih dari tenggat waktu tugas')->with('SopenSubtaskModal', $task->id);
-        }
-
-
-        $task->subtasks()->create([
-            'name' => $request->name,
-            'tenggat_waktu' => $request->tenggat_waktu,
-        ]);
-
-        return redirect()->back()->with('successES', 'Subtugas berhasil di tambahkan')->with('SopenSubtaskModal', $task->id);
+    if (strtotime($request->tenggat_waktu) < strtotime(Carbon::now()->format('Y-m-d'))) {
+        return redirect()->back()
+            ->with('errorES_' . $task->id, 'Tenggat waktu subtugas tidak boleh di masa lalu.')
+            ->with('SopenSubtaskModal', $task->id);
     }
+
+    if (strtotime($request->tenggat_waktu) > strtotime($task->tenggat_waktu)) {
+        return redirect()->back()
+            ->with('errorES_' . $task->id, 'Tenggat waktu subtugas tidak boleh lebih dari tenggat waktu tugas.')
+            ->with('SopenSubtaskModal', $task->id);
+    }
+
+    // Simpan subtugas
+    $task->subtasks()->create([
+        'name' => $request->name,
+        'tenggat_waktu' => $request->tenggat_waktu,
+    ]);
+
+    return redirect()->back()
+        ->with('successES_' . $task->id, 'Subtugas berhasil ditambahkan.')
+        ->with('SopenSubtaskModal', $task->id);
+}
+
 
 
 
@@ -225,7 +231,7 @@ class TaskController extends Controller
     $modalOrigin = $request->input('modal_origin', 'subtaskModal');
 
     return redirect()->back()
-        ->with('successES', 'Sub tugas berhasil diselesaikan')
+        ->with('successES_' . $subtask->id, 'Sub tugas berhasil diselesaikan')
         ->with('openSubtaskModal', $modalOrigin . '-' . $subtask->task_id);
 }
 
@@ -234,7 +240,7 @@ class TaskController extends Controller
     {
         $modalOrigin = $request->input('modal_origin', 'subtaskModal');
         if ($subtask->status == 'belum') {
-            return redirect()->back()->with('errorES', 'Sub tugas yang belum selesai tidak bisa di hapus')->with('openSubtaskModal', $modalOrigin . '-' . $subtask->task_id);
+            return redirect()->back()->with('errorES_' . $subtask->id, 'Sub tugas yang belum selesai tidak bisa di hapus')->with('openSubtaskModal', $modalOrigin . '-' . $subtask->task_id);
         }else{
             
             $subtask->delete();
@@ -288,13 +294,13 @@ class TaskController extends Controller
         $subtask = Subtask::findOrFail($id);
 
         $request->validate([
-            'name' => 'nullable|string|max:255',
-            'tenggat_waktu' => 'nullable|date',
-
+            'name' => 'string|max:255',
+            'tenggat_waktu' => 'date',
         ]);
 
         $task = $subtask->task;
 
+        
         if($request->name == $subtask->name && strtotime($request->tenggat_waktu) == strtotime($subtask->tenggat_waktu)){
             return redirect()->back()
             ->with('warningES', 'sub tugas tidak ada yang berubah')
@@ -302,9 +308,9 @@ class TaskController extends Controller
         }
 
         if (strtotime($request->tenggat_waktu) < strtotime(Carbon::now()->format('Y-m-d'))) {
-            return redirect()->back()->with('errorES', 'Tenggat waktu subtask tidak boleh di masa lalu.')->with('SopenSubtaskModal', $subtask->task_id);
+            return redirect()->back()->with('errorES', 'Tenggat waktu subtugas tidak boleh di masa lalu.')->with('SopenSubtaskModal', $subtask->task_id);
         }else if (strtotime($request->tenggat_waktu) > strtotime($task->tenggat_waktu)) {
-            return redirect()->back()->with('errorES', 'Tenggat waktu subtask tidak boleh lebih dari tenggat waktu task.')->with('SopenSubtaskModal', $subtask->task_id);
+            return redirect()->back()->with('errorES', 'Tenggat waktu subtugas tidak boleh lebih dari tenggat waktu tugas utama.')->with('SopenSubtaskModal', $subtask->task_id);
         }
 
         $subtask->update([

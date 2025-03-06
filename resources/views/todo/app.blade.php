@@ -342,12 +342,12 @@
                                 @method('PUT')
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Nama Tugas</label>
-                                    <input type="text" class="form-control" id="taskName" name="name" value="{{ $task->name }}" >
+                                    <input type="text" class="form-control" id="taskName" name="name" required value="{{ $task->name }}" >
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="deskripsi" class="form-label">Deskripsi</label>
-                                    <textarea class="form-control" id="taskDescription" name="deskripsi" rows="3" required>{{ $task->deskripsi }}</textarea>
+                                    <textarea class="form-control" id="taskDescription" name="deskripsi" rows="3" >{{ $task->deskripsi }}</textarea>
                                 </div>
 
                                 <div class="mb-3">
@@ -392,22 +392,42 @@
                             </div>
                             <button type="button" class="btn-close btn-sm position-absolute top-0 end-0" data-bs-dismiss="modal"></button>
                         </div>
-                        @if (session('successES'))
-                        <div class="alert alert-success mx-1" id="success-alert">
-                            {{ session('successES') }}
-                        </div>
+                        @if (session()->has('errorES_' . $task->id))
+                            <div class="alert alert-danger">
+                                {{ session('errorES_' . $task->id) }}
+                            </div>
                         @endif
-                        @if (session('errorES'))
-                        <div class="alert alert-danger mx-1" id="error-alert">
-                            {{ session('errorES') }}
-                        </div>
+                        @if (session()->has('warningES_' . $task->id))
+                            <div class="alert alert-warning">
+                                {{ session('warningES_' . $task->id) }}
+                            </div>
                         @endif
-                        @if (session('warningES'))
-                        <div class="alert alert-warning mx-1" id="warning-alert">
-                            {{ session('warningES') }}
-                        </div>
+                        @if (session()->has('successES_' . $task->id))
+                            <div class="alert alert-success">
+                                {{ session('successES_' . $task->id) }}
+                            </div>
                         @endif
-                        
+
+                        @foreach ($task->subtasks as $subtask)
+                            @if (session()->has('errorES_' . $subtask->id))
+                                <div class="alert alert-danger">
+                                    {{ session('errorES_' . $subtask->id) }}
+                                </div>
+                            @endif
+
+                            @if (session()->has('successES_' . $subtask->id))
+                                <div class="alert alert-success">
+                                    {{ session('successES_' . $subtask->id) }}
+                                </div>
+                            @endif
+                            @if (session()->has('warningES_' . $subtask->id))
+                                <div class="alert alert-warning">
+                                    {{ session('warningES_' . $subtask->id) }}
+                                </div>
+                            @endif
+                        @endforeach
+
+                    
                         <div class="modal-body">
                             <!-- Form Tambah Subtask -->
                             <form action="{{ route('subtasks.store', $task->id) }}" method="POST">
@@ -549,12 +569,12 @@
                                 
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Nama Sub task</label>
-                                    <input type="text" class="form-control" name="name" value="{{ $subtask->name }}">
+                                    <input type="text" class="form-control" name="name" value="{{ $subtask->name }}" required>
                                 </div>
             
                                 <div class="mb-3">
                                     <label for="tenggat_waktu" class="form-label">Tenggat Waktu</label>
-                                    <input type="datetime-local" class="form-control" name="tenggat_waktu" oninput="this.blur()" value="{{ \Carbon\Carbon::parse($subtask->tenggat_waktu)->format('Y-m-d\TH:i') }}">
+                                    <input type="datetime-local" class="form-control" name="tenggat_waktu" oninput="this.blur()" required value="{{ \Carbon\Carbon::parse($subtask->tenggat_waktu)->format('Y-m-d\TH:i') }}">
                                 </div>
             
                                 <div class="text-center">
