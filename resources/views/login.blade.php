@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Login FamiList</title>
-    <!-- Bootstrap CSS -->
     <link rel="icon" href="{{ asset('images/favicon(2)-32x32.png') }}" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             background: linear-gradient(45deg, #a6c0fe, #f68084);
@@ -26,7 +26,7 @@
             padding: 2rem;
         }
         .btn-primary {
-            background-color: #1976d2; /* Warna biru sedang */
+            background-color: #1976d2; 
             border: none;
             padding: 10px 20px;
             border-radius: 25px;
@@ -34,7 +34,7 @@
             transition: background-color 0.3s ease;
         }
         .btn-primary:hover {
-            background-color: #1565c0; /* Warna biru lebih gelap saat hover */
+            background-color: #1565c0;
         }
         .form-control {
             border-radius: 25px;
@@ -46,14 +46,29 @@
             box-shadow: 0 0 5px rgba(25, 118, 210, 0.5);
         }
         .text-danger {
-            color: #d32f2f !important; /* Warna merah untuk pesan error */
+            color: #d32f2f !important; 
         }
         a {
-            color: #1976d2; /* Warna biru untuk link */
+            color: #1976d2; 
             text-decoration: none;
         }
         a:hover {
             text-decoration: underline;
+        }
+        .password-input-group {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+            z-index: 5;
+        }
+        .password-toggle:hover {
+            color: #1976d2;
         }
     </style>
 </head>
@@ -74,7 +89,7 @@
                         </div>
                     @endif
 
-                    <!-- Menampilkan pesan sukses -->
+                  
                     @if(session('success'))
                         <div class="alert alert-success">
                             {{ session('success') }}
@@ -86,8 +101,9 @@
                             <div class="mb-3">
                                 <input type="text" name="email" class="form-control" placeholder="Email Address" required>
                             </div>
-                            <div class="mb-3">
-                                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                            <div class="mb-3 password-input-group">
+                                <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+                                <i id="togglePasswordConfirmation" class="fa-regular fa-eye password-toggle" onclick="togglePassword()"></i>
                             </div>
                             <button class="btn btn-primary w-100">LOGIN</button>
                         </form>
@@ -107,15 +123,30 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS Bundle (popper.js included) -->
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.querySelectorAll('.alert').forEach(function (alert) {
-       alert.style.cursor = 'pointer';
-       alert.addEventListener('click', function () {
-           alert.style.display = 'none'; 
-       });
-   });
-   </script>
+            alert.style.cursor = 'pointer';
+            alert.addEventListener('click', function () {
+                alert.style.display = 'none'; 
+            });
+        });
+        
+        function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.querySelector('.password-toggle');
+
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      toggleIcon.classList.remove('fa-eye');
+      toggleIcon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      toggleIcon.classList.remove('fa-eye-slash');
+      toggleIcon.classList.add('fa-eye');
+    }
+  }
+    </script>
 </body>
 </html>

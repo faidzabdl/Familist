@@ -7,16 +7,24 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 
 Route::get('/halo', [HaloController::class, 'index']);
 
+Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect('/tasks');
+    } else {
+        return view('login'); 
+    }
+});
 
 Route::middleware('auth')->group(function () {
 
     // Route::get('/', function () {
-    //     return view('welcome');
-    // });
+    //     return redirect('/tasks'); 
+    //     });
 
 
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
@@ -24,9 +32,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::put('/tasks/{id}', [TaskController::class, 'editTask'])->name('tasks.edit');
+    Route::delete('/tasks/deleteAll', [TaskController::class, 'deleteAll'])->name('tasks.deleteAll');
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.delete');
     Route::put('/tasks/{task}/toggle-done', [TaskController::class, 'toggleDone'])->name('tasks.toggle-done');
-
+    
 
     Route::post('/tasks/{task}/subtasks', [TaskController::class, 'subtaskStore'])->name('subtasks.store');
     Route::put('/subtask/{id}', [TaskController::class, 'editSubtask'])->name('subtasks.edit');
@@ -41,10 +50,17 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/profile/leaderboard', [ProfileController::class, 'leaderboard'])->name('profile.leaderboard');
+
+    Route::post('/tasks/update-reminder-status', [TaskController::class, 'updateReminderStatus'])->name('tasks.updateReminderStatus');
+
 });
 
 
 Route::middleware('guest')->group(function () {
+    // Route::get('/', function () {
+    //     return redirect('/login'); 
+    //     });
+
     Route::get('/registerasi', [AuthController::class, 'tampilRegisterasi'])->name('registerasi.tampil');
     Route::post('/registerasi/submit', [AuthController::class, 'submitRegisterasi'])->name('registerasi.submit');
 

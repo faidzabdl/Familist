@@ -19,7 +19,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed', // Pastikan password diulang
+            'password' => 'required|string|min:8|confirmed', 
         ]);
 
         if ($validator->fails()) {
@@ -29,7 +29,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')), // **Pakai Hash::make()**
+            'password' => Hash::make($request->input('password')), 
         ]);
         return redirect()->route('login')->with('success', 'Akun berhasil dibuat! Silakan login.');
 

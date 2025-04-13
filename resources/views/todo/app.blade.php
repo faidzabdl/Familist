@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FamiList</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="icon" href="{{ asset('images/favicon(2)-32x32.png') }}" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -250,25 +251,38 @@
 
 
         {{-- sort fitur --}}
+        <label for="sortOptions">Sort By</label>
+        <div class="w-100 d-flex justify-content-between">
             <form method="GET" action="{{ route('tasks.index') }}">
                 <div class="form-group my-2">
-                    <label for="sortOptions">Sort By</label>
+                   
+                    
                     <select class="form-select w-auto" name="sort_option" aria-label="Sort options" onchange="this.form.submit()">
                         <option selected value="default" {{ request('sort_option') == 'default' ? 'selected' : '' }}>Pilih opsi sortir</option>
-                        <option value="name_asc" {{ request('sort_option') == 'name_asc' ? 'selected' : '' }}>Nama Tugas (Ascending)</option>
-                        <option value="name_desc" {{ request('sort_option') == 'name_desc' ? 'selected' : '' }}>Nama Tugas (Descending)</option>
-                        <option value="tenggat_asc" {{ request('sort_option') == 'tenggat_asc' ? 'selected' : '' }}>Deadline (Ascending)</option>
-                        <option value="tenggat_desc" {{ request('sort_option') == 'tenggat_desc' ? 'selected' : '' }}>Deadline (Descending)</option>
+                        <option value="name_asc" {{ request('sort_option') == 'name_asc' ? 'selected' : '' }}>Nama Tugas (A-Z)</option>
+                        <option value="name_desc" {{ request('sort_option') == 'name_desc' ? 'selected' : '' }}>Nama Tugas (Z-A)</option>
+                        <option value="tenggat_asc" {{ request('sort_option') == 'tenggat_asc' ? 'selected' : '' }}>Deadline (Terdekat)</option>
+                        <option value="tenggat_desc" {{ request('sort_option') == 'tenggat_desc' ? 'selected' : '' }}>Deadline (Terlama)</option>
                         <option value="selesai" {{ request('sort_option') == 'selesai' ? 'selected' : '' }}>Tugas Selesai</option>
                         <option value="belum" {{ request('sort_option') == 'belum' ? 'selected' : '' }}>Tugas Belum Selesai</option>
                         <option value="terlambat" {{ request('sort_option') == 'terlambat' ? 'selected' : '' }}>Tugas Terlambat</option>
                         <option value="prioritas_1" {{ request('sort_option') == 'prioritas_1' ? 'selected' : '' }}>Prioritas 1</option>
                         <option value="prioritas_2" {{ request('sort_option') == 'prioritas_2' ? 'selected' : '' }}>Prioritas 2</option>
                         <option value="prioritas_3" {{ request('sort_option') == 'prioritas_3' ? 'selected' : '' }}>Prioritas 3</option>
-                        
                     </select>
+                   
+                
+                    
                 </div>
             </form>
+            <form action="{{ route('tasks.deleteAll') }}" id="formHapusAll" method="POST">
+                @csrf
+                @method('delete')
+                <button type="button" class="btn btn-danger btn-sm" title="Hapus Semua" onclick="hapusAll()" ><i class="fas fa-trash"></i>
+                </button>
+            </form>
+        </div>
+        
 
             <!-- Task List -->
             <div class="card">
@@ -650,6 +664,45 @@
     </div>
 </div>
 
+
+
+@if (session('reminders_shown') != true && $reminders->count() > 0)
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let reminderTasks = {!! json_encode($reminders->pluck('name')->toArray()) !!};
+            let taskList = reminderTasks.join('<br>• ');
+
+            Swal.fire({
+                title: 'Reminder!',
+                html: 'Tugas berikut sudah waktunya dikerjakan:<br><br>• ' + taskList,
+                icon: 'info',
+                confirmButtonText: 'Oke'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Setelah popup ditutup, kirim AJAX untuk update keterangan_reminder
+                    fetch("{{ route('tasks.updateReminderStatus') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({
+                            task_ids: {!! json_encode($reminders->pluck('id')->toArray()) !!}
+                        })
+                    }).then(response => {
+                        console.log('Reminder status updated');
+                    }).catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        });
+    </script>
+@endif
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script>
     document.querySelectorAll('.alert').forEach(function (alert) {
@@ -685,8 +738,8 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         if (sessionStorage.getItem("showForm") === "true") {
-            munculFormTask(true); // Gunakan parameter untuk buka paksa
-            sessionStorage.removeItem("showForm"); // Hapus supaya tidak terus muncul
+            munculFormTask(true); 
+            sessionStorage.removeItem("showForm"); 
         }
     });
 
@@ -703,19 +756,19 @@
  
     document.addEventListener("DOMContentLoaded", function () {
         @if(session('SopenSubtaskModal'))
-            var taskId = "{{ session('SopenSubtaskModal') }}"; // Ambil task ID dari session
+            var taskId = "{{ session('SopenSubtaskModal') }}"; 
             var subtaskModal = new bootstrap.Modal(document.getElementById("subtaskModal-" + taskId));
             subtaskModal.show();
         @endif
     });
 
     document.addEventListener("DOMContentLoaded", function() {
-    let openModal = "{{ session('openSubtaskModal') }}"; // Contoh: "subtaskViewModal-5"
+    let openModal = "{{ session('openSubtaskModal') }}"; 
     
     if (openModal) {
         let modalParts = openModal.split("-");
-        let modalId = modalParts[0];  // "subtaskModal" atau "subtaskViewModal"
-        let taskId = modalParts[1];   // ID tugas
+        let modalId = modalParts[0];  
+        let taskId = modalParts[1];   
 
         let targetModal = document.getElementById(modalId + "-" + taskId);
         if (targetModal) {
@@ -724,6 +777,12 @@
         }
     }
 });
+
+function hapusAll(){
+    if(confirm("Apa anda yakin ingin menghapus semua tugas dan subtugas yang sudah selesai ?")){
+        document.getElementById('formHapusAll').submit();
+    }
+}
 
 
 

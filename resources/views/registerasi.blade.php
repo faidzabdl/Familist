@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Registrasi FamiList</title>
-    <!-- Bootstrap CSS -->
     <link rel="icon" href="{{ asset('images/favicon(2)-32x32.png') }}" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             background: linear-gradient(45deg, #a6c0fe, #f68084);
@@ -55,6 +55,21 @@
         a:hover {
             text-decoration: underline;
         }
+        .password-input-group {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+            z-index: 5;
+        }
+        .password-toggle:hover {
+            color: #1976d2;
+        }
     </style>
 </head>
 <body>
@@ -83,11 +98,13 @@
                             <div class="mb-3">
                                 <input type="email" name="email" class="form-control" placeholder="Email Address" value="{{ old('email') }}" required>
                             </div>
-                            <div class="mb-3">
-                                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                            <div class="mb-3 password-input-group">
+                                <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+                                <i id="togglePassword" class="fa-regular fa-eye password-toggle" onclick="togglePassword('password', 'togglePassword')"></i>
                             </div>
-                            <div class="mb-3">
-                                <input type="password" name="password_confirmation" class="form-control" placeholder="Konfirmasi Password" required>
+                            <div class="mb-3 password-input-group">
+                                <input type="password" name="password_confirmation" id="passwordConfirmation" class="form-control" placeholder="Konfirmasi Password" required>
+                                <i id="togglePasswordConfirmation" class="fa-regular fa-eye password-toggle" onclick="togglePassword('passwordConfirmation', 'togglePasswordConfirmation')"></i>
                             </div>
                             <button class="btn btn-primary w-100">REGISTER</button>
                         </form>
@@ -121,8 +138,37 @@
     });
 });
 
+
+// Toggle password visibility
+// const togglePassword = document.querySelector('#togglePassword');
+//         const password = document.querySelector('#password');
         
-        
-    </script>
+//         togglePassword.addEventListener('click', function (e) {
+//             // toggle the type attribute
+//             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+//             password.setAttribute('type', type);
+            
+//             // toggle the eye icon
+//             this.classList.toggle('fa-eye');
+//             this.classList.toggle('fa-eye-slash');
+//         });
+
+
+function togglePassword(inputId, toggleIcon) {
+  const passwordInput = document.getElementById(inputId);
+  const icon = document.getElementById(toggleIcon);
+
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+</script>
+
 </body>
 </html>

@@ -64,11 +64,11 @@
                         <a class="nav-link" href="{{ route('account.setting') }}">
                             <i class="fa-solid fa-gear"></i> Setting Account
                         </a>
-                        <a class="nav-link" href="{{ route('logout') }}">
-                            <i class="fa-solid fa-right-from-bracket"></i> Logout
-                        </a>
                         <a class="nav-link" href="{{ route('profile.leaderboard') }}">
                             <i class="fa-solid fa-crown"></i> Leaderboard
+                        </a>
+                        <a class="nav-link" href="{{ route('logout') }}">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
                         </a>
                     </li>
                 </ul>

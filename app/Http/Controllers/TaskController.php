@@ -90,9 +90,18 @@ class TaskController extends Controller
             $tasksQuery->orderBy('created_at', 'desc');
         }
 
-        $tasks = $tasksQuery->paginate(5);
 
-        return view('todo.app', compact('tasks'));
+        $reminders = Task::where('user_id', $user_id)
+        ->where('status', 'belum')
+        ->where('keterangan_reminder', false)
+        ->where('reminder', '<=', Carbon::now())
+        ->get();
+    
+
+       $tasks = $tasksQuery->paginate(5)->appends(request()->query());
+
+
+        return view('todo.app', compact('tasks', 'reminders'));
     }
 
 
@@ -259,16 +268,16 @@ class TaskController extends Controller
             'reminder' => 'nullable|date',
             'prioritas' => 'nullable|integer|min:1|max:3',
         ]);
-
+  
         if ($request->name == $task->name && $request->deskripsi == $task->deskripsi && $request->prioritas == $task->prioritas && strtotime($request->tenggat_waktu) == strtotime($task->tenggat_waktu) && strtotime($request->reminder) == strtotime($task->reminder)) {
             return redirect()->back()->with('warning', 'Tugas tidak ada yang berubah');
         }
 
 
         if (Carbon::parse($request->reminder) > Carbon::parse($request->tenggat_waktu)) {
-            return redirect()->back()->with('error', 'reminder jangan lebih maju dari tenggat waktu');
+            return redirect()->back()->with('errorD', 'reminder jangan lebih maju dari tenggat waktu');
         } elseif (Carbon::parse($request->reminder) < Carbon::now()) {
-            return redirect()->back()->with('error', 'reminder jangan lebih mundur dari waktu sekarang');
+            return redirect()->back()->with('errorD', 'reminder jangan lebih mundur dari waktu sekarang');
         }
 
 
@@ -308,9 +317,9 @@ class TaskController extends Controller
         }
 
         if (strtotime($request->tenggat_waktu) < strtotime(Carbon::now()->format('Y-m-d'))) {
-            return redirect()->back()->with('errorES', 'Tenggat waktu subtugas tidak boleh di masa lalu.')->with('SopenSubtaskModal', $subtask->task_id);
+            return redirect()->back()->with('errorES_' . $subtask->id, 'Tenggat waktu subtugas tidak boleh di masa lalu.')->with('SopenSubtaskModal', $subtask->task_id);
         }else if (strtotime($request->tenggat_waktu) > strtotime($task->tenggat_waktu)) {
-            return redirect()->back()->with('errorES', 'Tenggat waktu subtugas tidak boleh lebih dari tenggat waktu tugas utama.')->with('SopenSubtaskModal', $subtask->task_id);
+            return redirect()->back()->with('errorES_' . $subtask->id, 'Tenggat waktu subtugas tidak boleh lebih dari tenggat waktu tugas utama.')->with('SopenSubtaskModal', $subtask->task_id);
         }
 
         $subtask->update([
@@ -321,9 +330,39 @@ class TaskController extends Controller
        
 
         return redirect()->back()
-        ->with('successES', 'sub tugas berhasil diedit!')
-        ->with('SopenSubtaskModal', $subtask->task_id); // Simpan task ID yang harus dibuka
+        ->with('successES_' . $subtask->id, 'sub tugas berhasil diedit!')
+        ->with('SopenSubtaskModal', $subtask->task_id); 
     
     
     }
+
+    public function deleteAll() {
+        // $subtask = Subtask::where('status', 'selesai');
+        $tugasSelesai = Task::where('status', 'selesai')->orwhere('status', 'terlambat')->get();
+
+        foreach($tugasSelesai as $tugas){
+            $tugas->subtasks()->delete();
+
+            $tugas->delete();
+        }
+
+        return redirect()->back()->with('warning', 'Berhasil menghapus semua tugas dan subtugas');
+    }
+
+
+    public function updateReminderStatus(Request $request)
+{
+    $taskIds = $request->task_ids;
+
+    Task::whereIn('id', $taskIds)
+        ->update(['keterangan_reminder' => true]);
+
+    return response()->json(['message' => 'Reminder updated']);
+}
+
+
+
+
+
+
 }
