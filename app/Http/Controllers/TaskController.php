@@ -247,7 +247,7 @@ class TaskController extends Controller
 
     public function deleteSubtask(Request $request, Subtask $subtask)
     {
-        $modalOrigin = $request->input('modal_origin', 'subtaskModal');
+        $modalOrigin = $request->input('modal_origin', 'subtaskViewModal');
         if ($subtask->status == 'belum') {
             return redirect()->back()->with('errorES_' . $subtask->id, 'Sub tugas yang belum selesai tidak bisa di hapus')->with('openSubtaskModal', $modalOrigin . '-' . $subtask->task_id);
         }else{
@@ -312,7 +312,7 @@ class TaskController extends Controller
         
         if($request->name == $subtask->name && strtotime($request->tenggat_waktu) == strtotime($subtask->tenggat_waktu)){
             return redirect()->back()
-            ->with('warningES', 'sub tugas tidak ada yang berubah')
+            ->with('warningES_' . $subtask->id, 'sub tugas tidak ada yang berubah')
             ->with('SopenSubtaskModal', $subtask->task_id);
         }
 

@@ -214,7 +214,7 @@
 
             <div class="card-body" id="card-body" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
         
-                <form action="{{ route('tasks.store') }}" method="POST">
+                <form action="{{ route('tasks.store') }}" id="tambahTugas" method="POST">
                     @csrf
                     <div class="mb-3">
                         <input type="text" class="form-control" id="name" name="name" placeholder="Nama tugas" value="{{ old('name') }}" required>
@@ -243,7 +243,7 @@
                     </div>
         
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" onclick="return confirm('Yakin data sudah benar?')" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -336,7 +336,7 @@
                                 <form action="{{ route('tasks.delete', $task->id) }}" method="POST">
                                     @csrf
                                     @method('delete')
-                                    <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Hapus" onclick="return confirm('Yakin ingin menghapus?')">✕</button>
                                 </form>
                             </div>
                         </li>
@@ -351,7 +351,7 @@
                         </div>
                         <div class="modal-body">
                             <!-- Form Edit Task -->
-                            <form action="{{ route('tasks.edit', $task->id) }}" method="POST">
+                            <form action="{{ route('tasks.edit', $task->id) }}" id="formEditTugas{{ $task->id }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <div class="mb-3">
@@ -383,7 +383,7 @@
                                 </div>
 
                                 <div class="text-center">
-                                    <button type="submit" class="btn btn-primary">Simpan</button>
+                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Yakin ingin mengedit?')">Simpan</button>
                                 </div>
                             </form>
                         </div>
@@ -485,11 +485,11 @@
                                         @endif
 
                                         <!-- Delete Subtask -->
-                                        <form action="{{ route('subtasks.delete', $subtask->id) }}" method="POST">
+                                        <form action="{{ route('subtasks.delete', $subtask->id) }}" id="formHapusSub{{ $subtask->id }}" method="POST">
                                             @csrf
                                             @method('delete')
                                             <input type="hidden" name="modal_origin" value="subtaskModal">
-                                            <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Hapus" onclick="return confirm('Yakin ingin menghapus?')">✕</button>
                                         </form>
                                     </div>
                                 </li>
@@ -546,11 +546,11 @@
                                         </form>
 
                                         <!-- Delete Subtask -->
-                                        <form action="{{ route('subtasks.delete', $subtask->id) }}" method="POST">
+                                        <form action="{{ route('subtasks.delete', $subtask->id) }}" id="formHapusSub{{ $subtask->id }}" method="POST">
                                             @csrf
                                             @method('delete')
                                             <input type="hidden" name="modal_origin" value="subtaskViewModal">
-                                            <button class="btn btn-danger btn-sm" title="Hapus">✕</button>
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Hapus" onclick="return confirm('Yakin ingin menghapus?')">✕</button>
                                         </form>
                                     </div>
                                 </li>
@@ -577,7 +577,7 @@
                         </div>
                         
                         <div class="modal-body">
-                            <form action="{{ route('subtasks.edit', $subtask->id) }}" method="POST">
+                            <form action="{{ route('subtasks.edit', $subtask->id) }}" id="formEditSubtugas{{ $subtask->id }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 
@@ -592,7 +592,7 @@
                                 </div>
             
                                 <div class="text-center">
-                                    <button type="submit" class="btn btn-primary">Simpan</button>
+                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Yakin ingin mengedit?')">Simpan</button>
                                 </div>
                             </form>
                         </div>
@@ -680,7 +680,7 @@
                 confirmButtonText: 'Oke'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Setelah popup ditutup, kirim AJAX untuk update keterangan_reminder
+                    
                     fetch("{{ route('tasks.updateReminderStatus') }}", {
                         method: "POST",
                         headers: {
@@ -778,14 +778,62 @@
     }
 });
 
+
+
 function hapusAll(){
     if(confirm("Apa anda yakin ingin menghapus semua tugas dan subtugas yang sudah selesai ?")){
         document.getElementById('formHapusAll').submit();
     }
 }
 
+// function hapusTugas(tipe, id){
+//     let formID = "";
+
+//     if(tipe === "tugas"){
+//         formID = "formHapus" + id;
+//     } else if(tipe === "subtugas"){
+//         formID = "formHapusSub" + id;
+//     }
+
+//     if(formID && confirm("Yakin ingin menghapus ?")) {
+//         const form = document.getElementById(formID);
+//         if(form){
+//             form.submit()
+//         }else{
+//             console.error("Form tidak ditemukan", formID)
+//         }
+//     }
+   
+// }
 
 
+// function tambahTugas(){
+//     if(confirm("Apa semua data sudah benar ?")){
+//         document.getElementById('tambahTugas').submit();
+//         console.log("tes");
+//     }
+// }
+
+
+// function edit(tipe, id){
+//     let formID = "";
+//     console.log("fungsi berhasil di jalankan dengan tipe", tipe, id);
+
+//     if(tipe === "tugas"){
+//         formID = "formEditTugas" + id;
+//     } else if(tipe === "subtugas"){
+//         formID = "formEditSubtugas" + id;
+//     }
+
+//     if(formID && confirm("Apa anda yakin ingin mengubah ?")) {
+//         const form = document.getElementById(formID);
+//         if(form){
+//             form.submit()
+//         }else{
+//             console.error("Form tidak ditemukan", formID)
+//         }
+//     }
+// }
 
 
 </script>
